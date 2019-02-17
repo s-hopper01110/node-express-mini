@@ -108,15 +108,29 @@ server.post('/api/users', ( req, res ) => {
 // When the client makes a DELETE request to /api/users/:id:
 
 // If the user with the specified id is not found:
-
-// return HTTP status code 404 (Not Found).
+//return HTTP status code 404 (Not Found).
 // return the following JSON object: { message: "The user with the specified ID does not exist." }.
-// If there's an error in removing the user from the database:
 
-// cancel the request.
-// respond with HTTP status code 500.
+// If there's an error in removing the user from the database: cancel the request & respond with HTTP status code 500.
 // return the following JSON object: { error: "The user could not be removed" }.
 
+//DELETE	/api/users/:id	Removes the user with the specified id and returns the deleted user
+
+server.delete('/api/users/:id', ( req, res ) => {
+    const { id } =req.params;
+    db
+    .remove(id)
+    .then(user => {
+        if( user ){
+            res.status(204).end();
+        }else{
+            res.status(404).json({ success: false,  message:'The user with the specified ID does not exist.' })
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ error: 'The user could not be removed' })
+    })
+})
     
 
 
