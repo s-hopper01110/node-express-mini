@@ -91,7 +91,7 @@ server.get('/api/users/:id', ( req, res ) => {
 
 server.post('/api/users', ( req, res ) => {
     const { name, bio } = req.body;
-    if ( !name && !bio ) {
+    if ( !name || !bio ) {
         res.status(400).json({ error: 'Please provide name and bio for the user.' });
     }else{
         db
@@ -131,13 +131,53 @@ server.delete('/api/users/:id', ( req, res ) => {
         res.status(500).json({ error: 'The user could not be removed' })
     })
 })
+
+//When the client makes a PUT request to /api/users/:id:
+
+// If the user with the specified id is not found: 
+//return HTTP status code 404 (Not Found).
+// return the following JSON object: { message: "The user with the specified ID does not exist." }.
+
+// If the request body is missing the name or bio property: cancel the request.
+// respond with HTTP status code 400 (Bad Request).
+// return the following JSON response: { errorMessage: "Please provide name and bio for the user." }.
+
+
+// If there's an error when updating the user: cancel the request & respond with HTTP status code 500.
+// return the following JSON object: { error: "The user information could not be modified." }.
+
+
+// If the user is found and the new information is valid:
+// update the user document in the database using the new information sent in the request body.
+// return HTTP status code 200 (OK).
+// return the newly updated user document.
+
+
+//PUT	/api/users/:id	Updates the user with the specified id using data from the request body. Returns the modified document, NOT the original.
+
+server.put('/api/users/:id', ( req, res ) => {
+    const { id } = req.params;
+    const changes = req.body;
+
+    db
+    .update( id, changes ) 
+    .then(userID => {
+        if(!userID){
+            res.status(404).json({ success: false, message:'The user with the specified ID does not exist.'  })
+        }else if ( !changes.name || !changes.bio){
+            return res.status(400).json({ success: false, message: 'Please provide name and bio for user' })
+        }else{
+            return res.status(200).json({ success: true, changes })
+    }
+
+})
+.catch(err=> {
+    res.status(500).json({ success:false, error:'The user information could not be modified.' })
+})
+})
+
+
     
-
-
-
-
-
-
 
 
 server.listen(4000, () => {
